@@ -7,11 +7,14 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 
 import java.io.IOException;
 import java.util.Date;
+
+@Component
 public class JwtFilter extends OncePerRequestFilter {
     @Value("${auth.app.secret}")
     private String secretKey;
@@ -34,15 +37,14 @@ public class JwtFilter extends OncePerRequestFilter {
             token = token.substring(7);
 
             try {
+
                 Claims claims = Jwts.parser()
                         .setSigningKey(secretKey)
                         .parseClaimsJws(token)
                         .getBody();
-
                 if (claims.getExpiration().before(new Date())) {
                     throw new ServletException("Token is expired");
                 }
-
                 request.setAttribute("claims", claims);
             } catch (Exception e) {
                 System.out.println(e.getMessage());

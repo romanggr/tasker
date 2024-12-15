@@ -8,7 +8,7 @@ import org.example.tasker_back.model.Task;
 import java.time.LocalDateTime;
 
 public class TaskMapper {
-    public static Task toEntity(CreateTaskRequest request){
+    public static Task toEntityCreate(CreateTaskRequest request){
         if(request == null) throw new IllegalArgumentException("Request is null");
 
         Task task = new Task();

@@ -34,7 +34,7 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public Team createTeam(CreateTeamRequest request) {
-        Team team = TeamMapper.toEntity(request);
+        Team team = TeamMapper.toEntityCreate(request);
         return teamRepository.save(team);
     }
 
@@ -47,7 +47,7 @@ public class TeamServiceImpl implements TeamService {
             throw new IllegalArgumentException("Only creator can update team");
         }
 
-        Team team = TeamMapper.toEntity(request);
+        Team team = TeamMapper.toEntityUpdate(request);
         return teamRepository.save(team);
     }
 

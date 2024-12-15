@@ -2,7 +2,7 @@ package org.example.tasker_back.controller.user;
 
 import lombok.RequiredArgsConstructor;
 import org.example.tasker_back.dto.user.*;
-import org.example.tasker_back.service.user.AuthServiceImpl;
+import org.example.tasker_back.service.user.auth.AuthServiceImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

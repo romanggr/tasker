@@ -1,5 +1,6 @@
 package org.example.tasker_back.dto.task;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.example.tasker_back.enums.Priority;
 import org.example.tasker_back.enums.TaskStatus;
@@ -7,6 +8,7 @@ import org.example.tasker_back.enums.TaskStatus;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@AllArgsConstructor
 @Data
 public class CreateTaskRequest {
     private String teamId;

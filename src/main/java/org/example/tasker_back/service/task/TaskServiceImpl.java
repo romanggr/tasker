@@ -64,7 +64,7 @@ public class TaskServiceImpl implements TaskService {
     public Task createTask(CreateTaskRequest request) {
         checkUserInTeam(request.getTeamId(), request.getCreatorEmail());
 
-        return taskRepository.save(TaskMapper.toEntity(request));
+        return taskRepository.save(TaskMapper.toEntityCreate(request));
     }
 
     @Override

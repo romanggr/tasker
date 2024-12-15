@@ -8,7 +8,7 @@ import java.util.List;
 
 public class TeamMapper {
 
-    public static Team toEntity(CreateTeamRequest request) {
+    public static Team toEntityCreate(CreateTeamRequest request) {
         if (request == null) {
             throw new IllegalArgumentException("Create request = null");
         };
@@ -22,7 +22,7 @@ public class TeamMapper {
         return entity;
     }
 
-    public static Team toEntity(UpdateTeamRequest request) {
+    public static Team toEntityUpdate(UpdateTeamRequest request) {
         if (request == null) {
             throw new IllegalArgumentException("Create request = null");
         };

@@ -1,17 +1,23 @@
 package org.example.tasker_back.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.tasker_back.enums.Priority;
 import org.example.tasker_back.enums.Role;
+import org.example.tasker_back.enums.TaskStatus;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 
 @Data
 @NoArgsConstructor
 @Document(collection = "users")
+@AllArgsConstructor
 public class User {
     @Id
     private String id;
@@ -25,23 +31,21 @@ public class User {
 }
 
 
+//Task task1 = new Task(
+//        "1",
+//        "Test Task",
+//        "This is a test task for the project",
+//        TaskStatus.RUNNING,
+//        Priority.HIGH,
+//        "team-123", // teamId
+//        Arrays.asList("user1@example.com", "user2@example.com"),
+//        "user1@example.com",
+//        LocalDateTime.now().plusDays(1),
+//        LocalDateTime.now(),
+//        LocalDateTime.now().plusDays(2)
+//)
 
 
-
-// team (if creator)
-// create team
-// update team
-// leave team
-// add users to team
-// delete users from team
-// get updated tasks from team (reload page)
-
-
-// get all tasks
-// get all tass where you are member
-// join to task
-// create task
-// finish task
 
 
 

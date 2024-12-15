@@ -1,5 +1,6 @@
 package org.example.tasker_back.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.example.tasker_back.enums.Priority;
@@ -13,6 +14,7 @@ import java.util.List;
 @Document(collection = "task")
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class Task {
     @Id
     private String id;

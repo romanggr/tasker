@@ -7,7 +7,7 @@ import org.example.tasker_back.model.User;
 import org.mindrot.jbcrypt.BCrypt;
 
 public class UserMapper {
-    public static User createUser(RegistrationRequest request, BCrypt bCrypt) {
+    public static User createUser(RegistrationRequest request) {
         if (request == null) {
             throw new IllegalArgumentException("Request is null or empty");
         }
@@ -33,6 +33,8 @@ public class UserMapper {
         userDTO.setFullName(user.getFullName());
         userDTO.setEmail(user.getEmail());
         userDTO.setRoles(user.getRoles());
+        userDTO.setTaskIds(user.getTaskIds());
+        userDTO.setTeamIds(user.getTeamIds());
 
         return userDTO;
     }

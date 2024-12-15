@@ -16,9 +16,9 @@ public class ApplicationConfiguration {
     }
 
     @Bean
-    public FilterRegistrationBean<JwtFilter> jwtFilter() {
+    public FilterRegistrationBean<JwtFilter> jwtFilterBean(JwtFilter jwtFilter) {
         FilterRegistrationBean<JwtFilter> registrationBean = new FilterRegistrationBean<>();
-        registrationBean.setFilter(new JwtFilter());
+        registrationBean.setFilter(jwtFilter);
         registrationBean.addUrlPatterns("/api/*");
         return registrationBean;
     }

@@ -1,11 +1,13 @@
 package org.example.tasker_back.dto.task;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.example.tasker_back.enums.Priority;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@AllArgsConstructor
 @Data
 public class UpdateTaskRequest {
     private String teamId;

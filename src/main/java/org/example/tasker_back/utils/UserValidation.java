@@ -3,11 +3,8 @@ package org.example.tasker_back.utils;
 import org.example.tasker_back.dto.user.RegistrationRequest;
 import org.example.tasker_back.dto.user.UpdatePasswordRequest;
 import org.example.tasker_back.dto.user.UpdateUserRequest;
-import org.example.tasker_back.model.User;
 import org.example.tasker_back.repository.UserRepository;
 import org.mindrot.jbcrypt.BCrypt;
-
-import java.util.Objects;
 
 public class UserValidation {
 
@@ -42,6 +39,10 @@ public class UserValidation {
         if (!password.matches(".*\\d.*")) {
             throw new IllegalArgumentException("Password must contain at least one digit");
         }
+
+        if (!password.matches(".*[a-zA-Z].*")) {
+            throw new IllegalArgumentException("Password must contain at least one letter");
+        }
     }
 
     public static void isValidName(String name) {
@@ -66,7 +67,6 @@ public class UserValidation {
     public static void isValidUpdatingPassword(UpdatePasswordRequest request, String currentHashedPassword) {
         isValidPassword(request.getNewPassword());
 
-        System.out.println(request.getCurrentPassword() + " " + currentHashedPassword);
         if (!BCrypt.checkpw(request.getCurrentPassword(), currentHashedPassword)) {
             throw new IllegalArgumentException("Please provide valid password");
         }

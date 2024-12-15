@@ -1,4 +1,4 @@
-package org.example.tasker_back.service.user;
+package org.example.tasker_back.service.user.auth;
 
 
 import org.example.tasker_back.dto.user.*;
@@ -8,7 +8,4 @@ public interface AuthService {
 
     AuthResponse login(LoginRequest request);
 
-    AuthResponse updateUser(UpdateUserRequest request);
-
-    AuthResponse updatePassword(UpdatePasswordRequest request);
 }
