@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
-    private final BCrypt bcrypt;
     private final JwtService jwtService;
 
     @Transactional
@@ -46,9 +45,5 @@ public class AuthServiceImpl implements AuthService {
                 .userDto(UserMapper.toDTO(userDb))
                 .build();
     }
-
-
-
-
 }
 
