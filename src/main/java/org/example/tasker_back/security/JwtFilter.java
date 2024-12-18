@@ -22,7 +22,7 @@ public class JwtFilter extends OncePerRequestFilter {
     private static final String AUTHORIZATION_HEADER = "Authorization";
 
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+    protected boolean shouldNotFilter(HttpServletRequest request) {
         String excludeUrl = "/api/v1/auth";
         return request.getRequestURI().startsWith(excludeUrl);
     }
@@ -35,19 +35,18 @@ public class JwtFilter extends OncePerRequestFilter {
 
         if (token != null && token.startsWith("Bearer ")) {
             token = token.substring(7);
-
             try {
-
                 Claims claims = Jwts.parser()
                         .setSigningKey(secretKey)
                         .parseClaimsJws(token)
                         .getBody();
+
                 if (claims.getExpiration().before(new Date())) {
                     throw new ServletException("Token is expired");
                 }
+
                 request.setAttribute("claims", claims);
             } catch (Exception e) {
-                System.out.println(e.getMessage());
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.getWriter().write("Invalid or expired token");
                 return;
