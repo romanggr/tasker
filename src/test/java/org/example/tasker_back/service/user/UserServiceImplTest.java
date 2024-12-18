@@ -1,6 +1,7 @@
 package org.example.tasker_back.service.user;
 
 import org.example.tasker_back.dto.user.AuthResponse;
+import org.example.tasker_back.dto.user.UpdatePasswordRequest;
 import org.example.tasker_back.dto.user.UpdateUserRequest;
 import org.example.tasker_back.enums.Role;
 import org.example.tasker_back.model.User;
@@ -11,6 +12,7 @@ import org.example.tasker_back.security.JwtService;
 import org.example.tasker_back.service.user.user.UserServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mindrot.jbcrypt.BCrypt;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -141,6 +143,41 @@ class UserServiceImplTest {
         verify(teamRepository, never()).saveAll(any());
         verify(taskRepository, never()).findAllById(testUser.getTaskIds());
         verify(taskRepository, never()).saveAll(any());
+    }
+
+
+    @Test
+    void updatePassword_success() {
+        User testUser = new User("123", "testEmail@email.com",
+                "User 1", BCrypt.hashpw("password123", BCrypt.gensalt()), List.of(Role.DESIGNER, Role.BIG_DATA), null, null);
+        UpdatePasswordRequest request = new UpdatePasswordRequest("123", "newPassword123", "password123");
+
+        when(userRepository.findById(request.getId())).thenReturn(Optional.of(testUser));
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(jwtService.generateToken(testUser.getEmail())).thenReturn("jwt");
+
+        AuthResponse response = userService.updatePassword(request);
+
+        assertEquals("jwt", response.getToken());
+
+        verify(userRepository, times(1)).findById(request.getId());
+        verify(userRepository, times(1)).save(any());
+        verify(jwtService, times(1)).generateToken(testUser.getEmail());
+
+    }
+
+    @Test
+    void updatePassword_userNotFound() {
+        UpdatePasswordRequest request = new UpdatePasswordRequest("123", "newPassword123", "password123");
+
+        when(userRepository.findById(request.getId())).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class, () -> userService.updatePassword(request));
+
+        verify(userRepository, times(1)).findById(request.getId());
+        verify(userRepository, never()).save(any());
+        verify(jwtService, never()).generateToken(any());
+
     }
 
 }
