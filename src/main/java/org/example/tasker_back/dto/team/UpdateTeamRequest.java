@@ -11,5 +11,5 @@ public class UpdateTeamRequest {
     private String id;
     private String name;
     private List<String> collaboratorsEmails;
-    private String creatorEmail;
+    private String userWhoUpdate;
 }

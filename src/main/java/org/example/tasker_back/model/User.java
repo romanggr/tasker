@@ -22,7 +22,9 @@ public class User {
     @Id
     private String id;
 
+    @Indexed
     private String email;
+
     private String fullName;
     private String password;
     private List<Role> roles;
@@ -31,19 +33,7 @@ public class User {
 }
 
 
-//Task task1 = new Task(
-//        "1",
-//        "Test Task",
-//        "This is a test task for the project",
-//        TaskStatus.RUNNING,
-//        Priority.HIGH,
-//        "team-123", // teamId
-//        Arrays.asList("user1@example.com", "user2@example.com"),
-//        "user1@example.com",
-//        LocalDateTime.now().plusDays(1),
-//        LocalDateTime.now(),
-//        LocalDateTime.now().plusDays(2)
-//)
+
 
 
 

@@ -5,6 +5,7 @@ import org.example.tasker_back.dto.task.UpdateTaskRequest;
 import org.example.tasker_back.enums.Priority;
 import org.example.tasker_back.enums.TaskStatus;
 import org.example.tasker_back.model.Task;
+import org.example.tasker_back.model.Team;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -39,7 +40,18 @@ public class TaskMapperTest {
     @Test
     void toEntityCreate_null() {
         assertThrows(IllegalArgumentException.class, () -> {
-            TeamMapper.toEntityCreate(null);
+            TaskMapper.toEntityCreate(null);
+        });
+    }
+
+    @Test
+    void toEntityCreate_name_null() {
+        CreateTaskRequest request = new CreateTaskRequest("id123", "Main Backend",
+                "description", Priority.HIGH, List.of("user1@email.com", "user3@email.com"),
+                "user3@email.com", LocalDateTime.now());
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            TaskMapper.toEntityCreate(request);
         });
     }
 
@@ -93,7 +105,7 @@ public class TaskMapperTest {
     @Test
     void toEntityUpdate_null() {
         assertThrows(IllegalArgumentException.class, () -> {
-            TeamMapper.toEntityUpdate(null);
+            TaskMapper.toEntityUpdate(null, new Task());
         });
     }
 }

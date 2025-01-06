@@ -24,7 +24,7 @@ public class Task {
     private TaskStatus status;
     private Priority priority;
     private String teamId;
-    private List<String> collaboratorsEmails; // users emails who do this task
+    private List<String> collaboratorsEmails;
     private String creatorEmail;
     private LocalDateTime startsAt;
     private LocalDateTime createdAt;

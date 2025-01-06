@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Document(collection = "team")
 @Data
@@ -16,12 +17,11 @@ import java.util.List;
 @AllArgsConstructor
 public class Team {
     @Id
-    private int id;
+    private String id;
 
     private String name;
     private List<Task> tasks;
     private List<String> collaboratorsEmails;
     private String creatorEmail;
-
 }
 
