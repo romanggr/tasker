@@ -24,9 +24,19 @@ public class JwtService {
                 .compact();
     }
 
+    public String generateToken(String email, long expiration) {
+        return Jwts.builder()
+                .setSubject(email)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .signWith(io.jsonwebtoken.SignatureAlgorithm.HS256, secretKey)
+                .compact();
+    }
+
     public boolean isTokenValid(String token, String email) {
         Claims claims = Jwts.parser()
                 .setSigningKey(secretKey)
+                .setAllowedClockSkewSeconds(2)
                 .parseClaimsJws(token)
                 .getBody();
 
