@@ -33,9 +33,7 @@ public class TeamMapperTest {
 
     @Test
     void toEntityCreate_null() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            TeamMapper.toEntityCreate(null, null);
-        });
+        assertThrows(IllegalArgumentException.class, () -> TeamMapper.toEntityCreate(null, null));
     }
 
     @Test
@@ -44,9 +42,7 @@ public class TeamMapperTest {
                 List.of("user1@email.com"), "user3@email.com");
         List<String> collaborators = List.of("user1@email.com", "user3@email.com");
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            TeamMapper.toEntityCreate(request, collaborators);
-        });
+        assertThrows(IllegalArgumentException.class, () -> TeamMapper.toEntityCreate(request, collaborators));
     }
 
     @Test
@@ -55,9 +51,7 @@ public class TeamMapperTest {
                 List.of("user1@email.com"), "");
         List<String> collaborators = List.of("user1@email.com", "user3@email.com");
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            TeamMapper.toEntityCreate(request, collaborators);
-        });
+        assertThrows(IllegalArgumentException.class, () -> TeamMapper.toEntityCreate(request, collaborators));
     }
 
 
@@ -80,10 +74,26 @@ public class TeamMapperTest {
     }
 
     @Test
+    void toEntityUpdate_emptyName() {
+        UpdateTeamRequest request = new UpdateTeamRequest("id123", "",
+                List.of("user1@email.com", "user3@email.com"), "user3@email.com");
+
+        Team team = new Team("id123", "Backend", Collections.emptyList(), Collections.emptyList(), "user3@email.com");
+
+        Team response = TeamMapper.toEntityUpdate(request, team);
+
+        assertNotNull(request);
+        assertEquals("id123", response.getId());
+        assertEquals("Backend", response.getName());
+        assertEquals(2, response.getCollaboratorsEmails().size());
+        assertTrue(response.getCollaboratorsEmails().contains("user1@email.com"));
+        assertTrue(response.getCollaboratorsEmails().contains("user3@email.com"));
+        assertEquals("user3@email.com", response.getCreatorEmail());
+    }
+
+    @Test
     void toEntityUpdate_null() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            TeamMapper.toEntityUpdate(null, new Team());
-        });
+        assertThrows(IllegalArgumentException.class, () -> TeamMapper.toEntityUpdate(null, new Team()));
     }
 
 }

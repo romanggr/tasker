@@ -1,4 +1,4 @@
-package org.example.tasker_back.service.user;
+package org.example.tasker_back.service.user.user;
 
 import org.example.tasker_back.dto.user.AuthResponse;
 import org.example.tasker_back.dto.user.UpdatePasswordRequest;
@@ -9,7 +9,6 @@ import org.example.tasker_back.repository.TaskRepository;
 import org.example.tasker_back.repository.TeamRepository;
 import org.example.tasker_back.repository.UserRepository;
 import org.example.tasker_back.security.JwtService;
-import org.example.tasker_back.service.user.user.UserServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mindrot.jbcrypt.BCrypt;
@@ -181,5 +180,4 @@ class UserServiceImplTest {
         verify(jwtService, never()).generateToken(any());
 
     }
-
 }

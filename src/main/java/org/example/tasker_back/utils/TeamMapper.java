@@ -6,7 +6,6 @@ import org.example.tasker_back.model.Team;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class TeamMapper {
 
@@ -36,7 +35,7 @@ public class TeamMapper {
             throw new IllegalArgumentException("Create request = null");
         }
 
-        entity.setName(request.getName());
+        entity.setName(request.getName() == null || request.getName().isEmpty() ? entity.getName() : request.getName());
         entity.setCollaboratorsEmails(request.getCollaboratorsEmails());
 
         return entity;

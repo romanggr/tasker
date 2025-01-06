@@ -1,4 +1,4 @@
-package org.example.tasker_back.service.auth;
+package org.example.tasker_back.service.user.auth;
 
 import org.example.tasker_back.dto.user.AuthResponse;
 import org.example.tasker_back.dto.user.LoginRequest;
@@ -7,7 +7,6 @@ import org.example.tasker_back.enums.Role;
 import org.example.tasker_back.model.User;
 import org.example.tasker_back.repository.UserRepository;
 import org.example.tasker_back.security.JwtService;
-import org.example.tasker_back.service.user.auth.AuthServiceImpl;
 import org.example.tasker_back.utils.UserMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,7 +35,6 @@ public class AuthServiceImplTest {
 
     @Test
     void register_success() {
-        // Arrange
         RegistrationRequest request = new RegistrationRequest(
                 "Tom Holland",
                 "password123",
@@ -48,10 +46,8 @@ public class AuthServiceImplTest {
         when(userRepository.save(any(User.class))).thenReturn(user);
         when(jwtService.generateToken(user.getEmail())).thenReturn("mockedToken");
 
-        // Act
         AuthResponse response = authService.register(request);
 
-        // Assert
         assertNotNull(response);
         assertEquals("mockedToken", response.getToken());
         assertEquals(request.getEmail(), response.getUserDto().getEmail());
@@ -62,7 +58,6 @@ public class AuthServiceImplTest {
 
     @Test
     void register_invalidEmail() {
-        // Arrange
         RegistrationRequest request = new RegistrationRequest(
                 "Tom Holland",
                 "password123",
@@ -130,8 +125,4 @@ public class AuthServiceImplTest {
         verify(userRepository, times(1)).findByEmail(request.getEmail());
         verify(jwtService, never()).generateToken(userFromDb.getEmail());
     }
-
-
-
-
 }
