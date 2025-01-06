@@ -167,10 +167,8 @@ class TeamServiceImplTest {
                 new User("4", "user2@gmail.com", "User 2", "password123", List.of(), null, new ArrayList<>())
         ));
 
-        // Act
         Team updatedTeam = teamService.updateTeam(request);
 
-        // Assert
         assertNotNull(updatedTeam);
         assertEquals("Updated Team", updatedTeam.getName());
         assertTrue(updatedTeam.getCollaboratorsEmails().contains("user1@gmail.com"));
@@ -185,24 +183,28 @@ class TeamServiceImplTest {
     }
 
 
-    // other creator
+    @Test
+    void updateTeam_invalidCreator(){
+        UpdateTeamRequest request = new UpdateTeamRequest(
+                "team123",
+                "Updated Team",
+                new ArrayList<>(List.of("user1@gmail.com", "user2@gmail.com")),
+                "creator@gmail.com"
+        );
 
+        Team dbTeam = new Team(
+                "team123",
+                "Original Team",
+                new ArrayList<>(),
+                new ArrayList<>(List.of("user1@gmail.com", "test1@gmail.com")),
+                "other@gmail.com"
+        );
 
-//    @Test
-//    void updateTeam_invalidCreator() {
-//        List<String> collaborators = new ArrayList<>(List.of("email1@gmail.com", "email2@gmail.com"));
-//        UpdateTeamRequest request = new UpdateTeamRequest("32rsa", "Main", collaborators, "creator@gmail.com");
-//
-//        Team team = new Team();
-//        team.setId("team123");
-//        team.setCreatorEmail("creator11@gmail.com");
-//
-//        when(teamRepository.findById(request.getId())).thenReturn(Optional.of(team));
-//
-//        assertThrows(IllegalArgumentException.class, () -> teamService.updateTeam(request));
-//
-//        verify(teamRepository, never()).save(any(Team.class));
-//    }
+        when(teamRepository.findById(request.getId())).thenReturn(Optional.of(dbTeam));
+
+        assertThrows(IllegalArgumentException.class, () -> teamService.updateTeam(request));
+    }
+
 
 
 }
