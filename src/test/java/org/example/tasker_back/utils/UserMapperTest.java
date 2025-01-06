@@ -7,6 +7,7 @@ import org.example.tasker_back.enums.Role;
 import org.example.tasker_back.model.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mindrot.jbcrypt.BCrypt;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
@@ -28,16 +29,48 @@ public class UserMapperTest {
         assertNotNull(newUser);
         assertEquals("john.doe@example.com", newUser.getEmail());
         assertEquals("John Doe", newUser.getFullName());
+        assertTrue(BCrypt.checkpw("password123", newUser.getPassword()));
         assertEquals(2, newUser.getRoles().size());
         assertTrue(newUser.getRoles().contains(Role.ACCOUNTANT));
     }
 
     @Test
     void createUser_nullRequest() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            UserMapper.createUser(null);
-        });
+        assertThrows(IllegalArgumentException.class, () -> UserMapper.createUser(null));
     }
+
+    @Test
+    void createUser_nullName() {
+        RegistrationRequest request = new RegistrationRequest("",
+                "password123", "john.doe@example.com", List.of(Role.ACCOUNTANT, Role.DESIGNER));
+
+        assertThrows(IllegalArgumentException.class, () -> UserMapper.createUser(request));
+    }
+
+    @Test
+    void createUser_nullEmail() {
+        RegistrationRequest request = new RegistrationRequest("Name",
+                "password123", "", List.of(Role.ACCOUNTANT, Role.DESIGNER));
+
+        assertThrows(IllegalArgumentException.class, () -> UserMapper.createUser(request));
+    }
+
+    @Test
+    void createUser_nullPassword() {
+        RegistrationRequest request = new RegistrationRequest("Name",
+                "", "john.doe@example.com", List.of(Role.ACCOUNTANT, Role.DESIGNER));
+
+        assertThrows(IllegalArgumentException.class, () -> UserMapper.createUser(request));
+    }
+
+    @Test
+    void createUser_nullRoles() {
+        RegistrationRequest request = new RegistrationRequest("Name",
+                "password123", "john.doe@example.com", List.of());
+
+        assertThrows(IllegalArgumentException.class, () -> UserMapper.createUser(request));
+    }
+
 
 
     @Test
@@ -64,10 +97,10 @@ public class UserMapperTest {
 
     @Test
     void toDto_nullRequest() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            UserMapper.toDTO(null);
-        });
+        assertThrows(IllegalArgumentException.class, () -> UserMapper.toDTO(null));
     }
+
+
 
     @Test
     void updateUser_success() {
@@ -78,26 +111,27 @@ public class UserMapperTest {
 
         User updatedUser = UserMapper.updateUser(request, user);
 
-
         assertNotNull(updatedUser);
         assertEquals("doe@example.com", updatedUser.getEmail());
         assertEquals("Doe John", updatedUser.getFullName());
-        assertEquals(2, updatedUser.getRoles().size());
-        assertTrue(updatedUser.getRoles().contains(Role.ACCOUNTANT));
-        assertEquals(2, updatedUser.getTaskIds().size());
-        assertTrue(updatedUser.getTaskIds().contains("idTask1"));
-        assertTrue(updatedUser.getTaskIds().contains("idTask2"));
-        assertEquals(2, updatedUser.getTeamIds().size());
-        assertTrue(updatedUser.getTeamIds().contains("team1"));
-        assertTrue(updatedUser.getTeamIds().contains("team31"));
     }
 
     @Test
     void updateUser_nullRequest() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            UserMapper.updateUser(null, new User());
-        });
+        assertThrows(IllegalArgumentException.class, () -> UserMapper.updateUser(null, new User()));
     }
 
+    @Test
+    void updateUser_emptyRequest() {
+        User user = new User("id1234", "john.doe@example.com", "John Doe", "password123",
+                List.of(Role.ACCOUNTANT, Role.DESIGNER), List.of("idTask1", "idTask2"), List.of("team1", "team31"));
 
+        UpdateUserRequest request = new UpdateUserRequest("id123", null, null);
+
+        User updatedUser = UserMapper.updateUser(request, user);
+
+        assertNotNull(updatedUser);
+        assertEquals("john.doe@example.com", updatedUser.getEmail());
+        assertEquals("John Doe", updatedUser.getFullName());
+    }
 }

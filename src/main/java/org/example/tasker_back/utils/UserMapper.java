@@ -8,14 +8,21 @@ import org.mindrot.jbcrypt.BCrypt;
 
 public class UserMapper {
     public static User createUser(RegistrationRequest request) {
-        if (request == null) {
-            throw new IllegalArgumentException("Request is null or empty");
-        }
+        if (request == null) throw new IllegalArgumentException("Request is null or empty");
+        if (request.getEmail() == null || request.getEmail().isEmpty())
+            throw new IllegalArgumentException("Email is null or empty");
+        if (request.getPassword() == null || request.getPassword().isEmpty())
+            throw new IllegalArgumentException("Password is null or empty");
+        if (request.getFullName() == null || request.getFullName().isEmpty())
+            throw new IllegalArgumentException("Full name is null or empty");
+        if (request.getRoles() == null || request.getRoles().isEmpty())
+            throw new IllegalArgumentException("Roles is null or empty");
+
 
         User newUser = new User();
+        String hashedPassword = BCrypt.hashpw(request.getPassword(), BCrypt.gensalt());
 
         newUser.setEmail(request.getEmail());
-        String hashedPassword = BCrypt.hashpw(request.getPassword(), BCrypt.gensalt());
         newUser.setPassword(hashedPassword);
         newUser.setFullName(request.getFullName());
         newUser.setRoles(request.getRoles());
@@ -23,10 +30,9 @@ public class UserMapper {
         return newUser;
     }
 
+
     public static UserDTO toDTO(User user) {
-        if (user == null) {
-            throw new IllegalArgumentException("User is null or empty");
-        }
+        if (user == null) throw new IllegalArgumentException("User is null or empty");
 
         UserDTO userDTO = new UserDTO();
         userDTO.setId(user.getId());
@@ -40,13 +46,10 @@ public class UserMapper {
     }
 
     public static User updateUser(UpdateUserRequest request, User user) {
-        if (request == null) {
-            throw new IllegalArgumentException("Request is null or empty");
-        }
+        if (request == null) throw new IllegalArgumentException("Request is null or empty");
 
-        user.setId(request.getId());
-        user.setFullName(request.getFullName());
-        user.setEmail(request.getEmail());
+        user.setFullName(request.getFullName() == null || request.getFullName().isEmpty() ? user.getFullName() : request.getFullName());
+        user.setEmail(request.getEmail() == null || request.getEmail().isEmpty() ? user.getEmail() : request.getEmail());
 
         return user;
     }
