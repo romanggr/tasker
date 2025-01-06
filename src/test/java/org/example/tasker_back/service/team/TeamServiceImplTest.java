@@ -4,10 +4,10 @@ import org.example.tasker_back.dto.team.CreateTeamRequest;
 import org.example.tasker_back.dto.team.UpdateTeamRequest;
 import org.example.tasker_back.enums.Priority;
 import org.example.tasker_back.enums.TaskStatus;
+import org.example.tasker_back.exceptions.EntityNotFoundException;
 import org.example.tasker_back.model.Task;
 import org.example.tasker_back.model.Team;
 import org.example.tasker_back.model.User;
-import org.example.tasker_back.repository.TaskRepository;
 import org.example.tasker_back.repository.TeamRepository;
 import org.example.tasker_back.repository.UserRepository;
 import org.example.tasker_back.utils.TeamUtils;
@@ -31,9 +31,6 @@ import static org.mockito.Mockito.*;
 class TeamServiceImplTest {
     @Mock
     private TeamRepository teamRepository;
-
-    @Mock
-    private TaskRepository taskRepository;
 
     @Mock
     private UserRepository userRepository;
@@ -184,7 +181,7 @@ class TeamServiceImplTest {
 
 
     @Test
-    void updateTeam_invalidCreator(){
+    void updateTeam_invalidCreator() {
         UpdateTeamRequest request = new UpdateTeamRequest(
                 "team123",
                 "Updated Team",
@@ -205,6 +202,52 @@ class TeamServiceImplTest {
         assertThrows(IllegalArgumentException.class, () -> teamService.updateTeam(request));
     }
 
+    @Test
+    void updateTeam_invalidTeamId() {
+        UpdateTeamRequest request = new UpdateTeamRequest(
+                "team123",
+                "Updated Team",
+                new ArrayList<>(List.of("user1@gmail.com", "user2@gmail.com")),
+                "creator@gmail.com"
+        );
 
 
+        when(teamRepository.findById(request.getId())).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> teamService.updateTeam(request));
+    }
+
+    @Test
+    void updateTeam_userNotFound() {
+        UpdateTeamRequest request = new UpdateTeamRequest(
+                "team123",
+                "Updated Team",
+                new ArrayList<>(List.of("user1@gmail.com", "user2@gmail.com")),
+                "creator@gmail.com"
+        );
+
+        Team dbTeam = new Team(
+                "team123",
+                "Original Team",
+                new ArrayList<>(),
+                new ArrayList<>(List.of("user1@gmail.com", "test1@gmail.com")),
+                "creator@gmail.com"
+        );
+
+        List<User> usersFromTeam = List.of(
+                new User("1", "test1@gmail.com", "Test User 1", "password123", List.of(), null, List.of("team123")),
+                new User("2", "user1@gmail.com", "User 1", "password123", List.of(), null, List.of("team123")),
+                new User("3", "creator@gmail.com", "Creator", "password123", List.of(), null, List.of("team123"))
+        );
+
+        when(teamRepository.findById(request.getId())).thenReturn(Optional.of(dbTeam));
+        when(userRepository.findByTeamIdsContaining(dbTeam.getId())).thenReturn(usersFromTeam);
+        when(userRepository.findByEmail("user2@gmail.com")).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> teamService.updateTeam(request));
+
+        verify(teamRepository, times(1)).findById(anyString());
+        verify(userRepository, times(1)).findByTeamIdsContaining(anyString());
+        verify(userRepository, times(1)).findByEmail("user2@gmail.com");
+    }
 }
