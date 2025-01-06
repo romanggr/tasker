@@ -5,7 +5,6 @@ import org.example.tasker_back.dto.task.UpdateTaskRequest;
 import org.example.tasker_back.enums.Priority;
 import org.example.tasker_back.enums.TaskStatus;
 import org.example.tasker_back.model.Task;
-import org.example.tasker_back.model.Team;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -39,73 +38,163 @@ public class TaskMapperTest {
 
     @Test
     void toEntityCreate_null() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            TaskMapper.toEntityCreate(null);
-        });
+        assertThrows(IllegalArgumentException.class, () -> TaskMapper.toEntityCreate(null));
     }
 
+
+
     @Test
-    void toEntityCreate_name_null() {
-        CreateTaskRequest request = new CreateTaskRequest("id123", "Main Backend",
+    void toEntityCreate_emptyName() {
+        CreateTaskRequest request = new CreateTaskRequest("id123", "",
                 "description", Priority.HIGH, List.of("user1@email.com", "user3@email.com"),
                 "user3@email.com", LocalDateTime.now());
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            TaskMapper.toEntityCreate(request);
-        });
+        assertThrows(IllegalArgumentException.class, () -> TaskMapper.toEntityCreate(request));
     }
+
+    @Test
+    void toEntityCreate_emptyCreatorEmail() {
+        CreateTaskRequest request = new CreateTaskRequest("id123", "Main",
+                "description", Priority.HIGH, List.of("user1@email.com", "user3@email.com"),
+                "", LocalDateTime.now());
+
+        assertThrows(IllegalArgumentException.class, () -> TaskMapper.toEntityCreate(request));
+    }
+
+    @Test
+    void toEntityCreate_emptyTeamId() {
+        CreateTaskRequest request = new CreateTaskRequest("", "Main",
+                "description", Priority.HIGH, List.of("user1@email.com", "user3@email.com"),
+                "user3@email.com", LocalDateTime.now());
+
+        assertThrows(IllegalArgumentException.class, () -> TaskMapper.toEntityCreate(request));
+    }
+
+    @Test
+    void toEntityCreate_emptyPriority() {
+        CreateTaskRequest request = new CreateTaskRequest("123", "Main",
+                "description", null, List.of("user1@email.com", "user3@email.com"),
+                "user3@email.com", LocalDateTime.now());
+
+        Priority priority = TaskMapper.toEntityCreate(request).getPriority();
+
+        assertEquals(Priority.LOW, priority);
+    }
+
+
 
     @Test
     void toEntityUpdate_success() {
-        UpdateTaskRequest request = new UpdateTaskRequest(
-                "id1231",
-                "user1@email.com1",
-                "taskId1231",
-                "Main Backend Task1",
-                "description1",
-                Priority.LOW,
-                List.of("user1@email.com1", "user3@email.com1"),
-                "user3@email.com1",
-                LocalDateTime.now());
-
-        Task taskStart = new Task(
-                "taskId123",
-                "Task Name",
-                "Task Description",
-                TaskStatus.CREATED,
-                Priority.HIGH,
-                "teamId123",
-                List.of("email1@example.com", "email2@example.com"),
+        Task existingTask = new Task(
+                "task1",
+                "Original Task",
+                "Original Description",
+                TaskStatus.RUNNING,
+                Priority.MEDIUM,
+                "team123",
+                List.of("user1@example.com"),
                 "creator@example.com",
-                LocalDateTime.now(),
-                LocalDateTime.now(),
-                LocalDateTime.now().plusDays(1)
+                LocalDateTime.of(2025, 1, 1, 10, 0),
+                LocalDateTime.of(2024, 12, 31, 15, 0),
+                null
         );
 
-        Task task = TaskMapper.toEntityUpdate(request, taskStart);
+        UpdateTaskRequest request = new UpdateTaskRequest(
+                "team123",
+                "user1@example.com",
+                "task1",
+                "Updated Task",
+                "Updated Description",
+                Priority.HIGH,
+                List.of("user2@example.com", "creator@example.com"),
+                LocalDateTime.of(2025, 1, 2, 10, 0)
+        );
 
-        assertNotNull(task);
-        assertEquals("user1@email.com1", request.getUserEmail());
+        Task updatedTask = TaskMapper.toEntityUpdate(request, existingTask);
 
-        assertEquals("taskId123", task.getId());
-        assertEquals("Main Backend Task1", task.getName());
-        assertEquals("description1", task.getDescription());
-        assertEquals(TaskStatus.CREATED, task.getStatus());
-        assertEquals(Priority.LOW, task.getPriority());
-        assertEquals("id1231", request.getTeamId());
-        assertEquals(2, task.getCollaboratorsEmails().size());
-        assertTrue(task.getCollaboratorsEmails().contains("user1@email.com1"));
-        assertTrue(task.getCollaboratorsEmails().contains("user3@email.com1"));
-        assertEquals("user3@email.com1", task.getCreatorEmail());
-        assertNotNull(task.getStartsAt());
-        assertNotNull(task.getFinishedAt());
-        assertNotNull(task.getCreatedAt());
+        assertEquals("Updated Task", updatedTask.getName());
+        assertEquals("Updated Description", updatedTask.getDescription());
+        assertEquals(Priority.HIGH, updatedTask.getPriority());
+        assertEquals(LocalDateTime.of(2025, 1, 2, 10, 0), updatedTask.getStartsAt());
     }
 
     @Test
-    void toEntityUpdate_null() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            TaskMapper.toEntityUpdate(null, new Task());
-        });
+    void toEntityUpdate_nullRequest() {
+        Task existingTask = new Task();
+        UpdateTaskRequest request = null;
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> TaskMapper.toEntityUpdate(request, existingTask));
+        assertEquals("Request is null", exception.getMessage());
+    }
+
+    @Test
+    void toEntityUpdate_partialUpdate_success() {
+        Task existingTask = new Task(
+                "task1",
+                "Original Task",
+                "Original Description",
+                TaskStatus.RUNNING,
+                Priority.MEDIUM,
+                "team123",
+                List.of("user1@example.com"),
+                "creator@example.com",
+                LocalDateTime.of(2025, 1, 1, 10, 0),
+                LocalDateTime.of(2024, 12, 31, 15, 0),
+                null
+        );
+
+        UpdateTaskRequest request = new UpdateTaskRequest(
+                "team123",
+                "user1@example.com",
+                "task1",
+                null,
+                "Updated Description",
+                null,
+                List.of("user2@example.com", "creator@example.com"),
+                null
+        );
+
+        Task updatedTask = TaskMapper.toEntityUpdate(request, existingTask);
+
+        assertEquals("Original Task", updatedTask.getName());
+        assertEquals("Updated Description", updatedTask.getDescription());
+        assertEquals(Priority.MEDIUM, updatedTask.getPriority());
+        assertEquals(LocalDateTime.of(2025, 1, 1, 10, 0), updatedTask.getStartsAt());
+    }
+
+    @Test
+    void toEntityUpdate_nullFieldsInRequest_noChanges() {
+        Task existingTask = new Task(
+                "task1",
+                "Original Task",
+                "Original Description",
+                TaskStatus.RUNNING,
+                Priority.MEDIUM,
+                "team123",
+                List.of("user1@example.com"),
+                "creator@example.com",
+                LocalDateTime.of(2025, 1, 1, 10, 0),
+                LocalDateTime.of(2024, 12, 31, 15, 0),
+                null
+        );
+
+        UpdateTaskRequest request = new UpdateTaskRequest(
+                "team123",
+                "user1@example.com",
+                "task1",
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+
+        Task updatedTask = TaskMapper.toEntityUpdate(request, existingTask);
+
+        assertEquals("Original Task", updatedTask.getName());
+        assertEquals("Original Description", updatedTask.getDescription());
+        assertEquals(Priority.MEDIUM, updatedTask.getPriority());
+        assertEquals(List.of("user1@example.com"), updatedTask.getCollaboratorsEmails());
+        assertEquals(LocalDateTime.of(2025, 1, 1, 10, 0), updatedTask.getStartsAt());
     }
 }
