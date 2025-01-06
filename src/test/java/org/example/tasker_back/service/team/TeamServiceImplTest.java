@@ -1,6 +1,8 @@
 package org.example.tasker_back.service.team;
 
 import org.example.tasker_back.dto.team.CreateTeamRequest;
+import org.example.tasker_back.dto.team.DeleteTeamRequest;
+import org.example.tasker_back.dto.team.LeaveTeamRequest;
 import org.example.tasker_back.dto.team.UpdateTeamRequest;
 import org.example.tasker_back.enums.Priority;
 import org.example.tasker_back.enums.TaskStatus;
@@ -8,6 +10,7 @@ import org.example.tasker_back.exceptions.EntityNotFoundException;
 import org.example.tasker_back.model.Task;
 import org.example.tasker_back.model.Team;
 import org.example.tasker_back.model.User;
+import org.example.tasker_back.repository.TaskRepository;
 import org.example.tasker_back.repository.TeamRepository;
 import org.example.tasker_back.repository.UserRepository;
 import org.example.tasker_back.utils.TeamUtils;
@@ -34,6 +37,9 @@ class TeamServiceImplTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private TaskRepository taskRepository;
 
     @Mock
     private TeamUtils teamUtils;
@@ -249,5 +255,199 @@ class TeamServiceImplTest {
         verify(teamRepository, times(1)).findById(anyString());
         verify(userRepository, times(1)).findByTeamIdsContaining(anyString());
         verify(userRepository, times(1)).findByEmail("user2@gmail.com");
+    }
+
+
+    @Test
+    void deleteTeam_success() {
+        List<Task> tasks = List.of(
+                new Task("task1", "Implement Authentication", "Design and implement user authentication using Spring Security", TaskStatus.RUNNING, Priority.HIGH, "team123", List.of("test1@gmail.com", "creator@gmail.com"), "creator@gmail.com", LocalDateTime.of(2025, 1, 1, 9, 0), LocalDateTime.of(2024, 12, 31, 15, 0), null),
+                new Task("task2", "Write Documentation", "Write API documentation for the project using Swagger", TaskStatus.RUNNING, Priority.LOW, "team123", List.of("test1@gmail.com", "creator@gmail.com"), "creator@gmail.com", LocalDateTime.of(2025, 1, 2, 10, 0), LocalDateTime.of(2025, 1, 1, 16, 0), null)
+        );
+        Team dbTeam = new Team(
+                "team123",
+                "Original Team",
+                tasks,
+                new ArrayList<>(List.of("user1@gmail.com", "test1@gmail.com")),
+                "creator@gmail.com");
+        DeleteTeamRequest request = new DeleteTeamRequest("team123", "creator@gmail.com");
+
+        when(teamRepository.findById(request.getTeamId())).thenReturn(Optional.of(dbTeam));
+        when(userRepository.findByEmailIn(dbTeam.getCollaboratorsEmails())).thenReturn(List.of(
+                new User("1", "test1@gmail.com", "Test User 1", "password123", List.of(), new ArrayList<>(), List.of("team123")),
+                new User("2", "user1@gmail.com", "User 1", "password123", List.of(), null, List.of("team123"))
+        ));
+
+
+        teamService.deleteTeam(request);
+
+        verify(teamRepository, times(1)).findById(anyString());
+        verify(userRepository, times(1)).findByEmailIn(anyList());
+        verify(userRepository, times(1)).saveAll(anyList());
+        verify(teamRepository, times(1)).delete(any(Team.class));
+        verify(taskRepository, times(1)).deleteAll(anyList());
+    }
+
+    @Test
+    void deleteTeam_invalidCreator() {
+        List<Task> tasks = List.of(
+                new Task("task1", "Implement Authentication", "Design and implement user authentication using Spring Security", TaskStatus.RUNNING, Priority.HIGH, "team123", List.of("test1@gmail.com", "creator@gmail.com"), "creator@gmail.com", LocalDateTime.of(2025, 1, 1, 9, 0), LocalDateTime.of(2024, 12, 31, 15, 0), null),
+                new Task("task2", "Write Documentation", "Write API documentation for the project using Swagger", TaskStatus.RUNNING, Priority.LOW, "team123", List.of("test1@gmail.com", "creator@gmail.com"), "creator@gmail.com", LocalDateTime.of(2025, 1, 2, 10, 0), LocalDateTime.of(2025, 1, 1, 16, 0), null)
+        );
+        Team dbTeam = new Team(
+                "team123",
+                "Original Team",
+                tasks,
+                new ArrayList<>(List.of("user1@gmail.com", "test1@gmail.com")),
+                "creator1@gmail.com");
+        DeleteTeamRequest request = new DeleteTeamRequest("team123", "creator@gmail.com");
+
+        when(teamRepository.findById(request.getTeamId())).thenReturn(Optional.of(dbTeam));
+
+        assertThrows(IllegalArgumentException.class, () -> teamService.deleteTeam(request));
+
+        verify(teamRepository, times(1)).findById(anyString());
+    }
+
+    @Test
+    void deleteTeam_invalidId() {
+        DeleteTeamRequest request = new DeleteTeamRequest("team123", "creator@gmail.com");
+
+        when(teamRepository.findById(request.getTeamId())).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> teamService.deleteTeam(request));
+        verify(teamRepository, times(1)).findById(anyString());
+    }
+
+    @Test
+    void deleteTeam_emptyTasks() {
+        List<Task> tasks = List.of();
+        Team dbTeam = new Team(
+                "team123",
+                "Original Team",
+                tasks,
+                new ArrayList<>(List.of("user1@gmail.com", "test1@gmail.com")),
+                "creator@gmail.com");
+        DeleteTeamRequest request = new DeleteTeamRequest("team123", "creator@gmail.com");
+
+        when(teamRepository.findById(request.getTeamId())).thenReturn(Optional.of(dbTeam));
+        when(userRepository.findByEmailIn(dbTeam.getCollaboratorsEmails())).thenReturn(List.of(
+                new User("1", "test1@gmail.com", "Test User 1", "password123", List.of(), new ArrayList<>(), List.of("team123")),
+                new User("2", "user1@gmail.com", "User 1", "password123", List.of(), null, List.of("team123"))
+        ));
+
+
+        teamService.deleteTeam(request);
+
+        verify(teamRepository, times(1)).findById(anyString());
+        verify(userRepository, times(1)).findByEmailIn(anyList());
+        verify(userRepository, times(1)).saveAll(anyList());
+        verify(teamRepository, times(1)).delete(any(Team.class));
+        verify(taskRepository, never()).deleteAll(anyList());
+    }
+
+    @Test
+    void leaveTeam_success_notCreator() {
+        List<Task> tasks = List.of(
+                new Task("task1", "Implement Authentication", "Design and implement user authentication using Spring Security", TaskStatus.RUNNING, Priority.HIGH, "team123", List.of("test1@gmail.com", "creator@gmail.com"), "creator@gmail.com", LocalDateTime.of(2025, 1, 1, 9, 0), LocalDateTime.of(2024, 12, 31, 15, 0), null),
+                new Task("task2", "Write Documentation", "Write API documentation for the project using Swagger", TaskStatus.RUNNING, Priority.LOW, "team123", List.of("test1@gmail.com", "creator@gmail.com"), "creator@gmail.com", LocalDateTime.of(2025, 1, 2, 10, 0), LocalDateTime.of(2025, 1, 1, 16, 0), null)
+        );
+        Team dbTeam = new Team(
+                "team123",
+                "Original Team",
+                tasks,
+                new ArrayList<>(List.of("user1@gmail.com", "test1@gmail.com", "creator@gmail.com")),
+                "creator@gmail.com");
+
+        LeaveTeamRequest request = new LeaveTeamRequest("test1@gmail.com", "team123");
+
+        when(teamRepository.findById(request.getTeamId())).thenReturn(Optional.of(dbTeam));
+        when(userRepository.findByEmailIn(dbTeam.getCollaboratorsEmails())).thenReturn(List.of(
+                new User("1", "test1@gmail.com", "Test User 1", "password123", List.of(), new ArrayList<>(), List.of("team123")),
+                new User("2", "user1@gmail.com", "User 1", "password123", List.of(), null, List.of("team123"))));
+        when(taskRepository.findByCollaboratorsEmail(anyString())).thenReturn(tasks);
+        when(teamRepository.findByCollaboratorsEmailsContaining(anyString())).thenReturn(List.of(dbTeam));
+
+
+        teamService.leaveTeam(request);
+
+        verify(teamRepository, times(1)).findById(anyString());
+        verify(userRepository, times(1)).findByEmailIn(anyList());
+        verify(teamRepository, times(1)).findByCollaboratorsEmailsContaining(anyString());
+        verify(teamRepository, times(1)).saveAll(anyList());
+        verify(taskRepository, times(1)).findByCollaboratorsEmail(anyString());
+        verify(taskRepository, times(1)).saveAll(anyList());
+    }
+
+    @Test
+    void leaveTeam_success_creator() {
+        List<Task> tasks = List.of(
+                new Task("task1", "Implement Authentication", "Design and implement user authentication using Spring Security", TaskStatus.RUNNING, Priority.HIGH, "team123", List.of("test1@gmail.com", "creator@gmail.com"), "creator@gmail.com", LocalDateTime.of(2025, 1, 1, 9, 0), LocalDateTime.of(2024, 12, 31, 15, 0), null),
+                new Task("task2", "Write Documentation", "Write API documentation for the project using Swagger", TaskStatus.RUNNING, Priority.LOW, "team123", List.of("test1@gmail.com", "creator@gmail.com"), "creator@gmail.com", LocalDateTime.of(2025, 1, 2, 10, 0), LocalDateTime.of(2025, 1, 1, 16, 0), null)
+        );
+        Team dbTeam = new Team(
+                "team123",
+                "Original Team",
+                tasks,
+                new ArrayList<>(List.of("user1@gmail.com", "test1@gmail.com", "creator@gmail.com")),
+                "creator@gmail.com");
+
+        LeaveTeamRequest request = new LeaveTeamRequest("creator@gmail.com", "team123");
+
+        when(teamRepository.findById(request.getTeamId())).thenReturn(Optional.of(dbTeam));
+        when(userRepository.findByEmailIn(dbTeam.getCollaboratorsEmails())).thenReturn(List.of(
+                new User("1", "test1@gmail.com", "Test User 1", "password123", List.of(), new ArrayList<>(), List.of("team123")),
+                new User("2", "user1@gmail.com", "User 1", "password123", List.of(), null, List.of("team123"))));
+        when(taskRepository.findByCollaboratorsEmail(anyString())).thenReturn(tasks);
+        when(teamRepository.findByCollaboratorsEmailsContaining(anyString())).thenReturn(List.of(dbTeam));
+
+
+        teamService.leaveTeam(request);
+
+        verify(teamRepository, times(1)).findById(anyString());
+        verify(userRepository, times(1)).findByEmailIn(anyList());
+        verify(teamRepository, times(1)).findByCollaboratorsEmailsContaining(anyString());
+        verify(teamRepository, times(1)).saveAll(anyList());
+        verify(taskRepository, times(1)).findByCollaboratorsEmail(anyString());
+        verify(taskRepository, times(1)).saveAll(anyList());
+    }
+
+    @Test
+    void leaveTeam_success_creatorOnlyOneCollaborator() {
+        List<Task> tasks = List.of(
+                new Task("task1", "Implement Authentication", "Design and implement user authentication using Spring Security", TaskStatus.RUNNING, Priority.HIGH, "team123", List.of("creator@gmail.com"), "creator@gmail.com", LocalDateTime.of(2025, 1, 1, 9, 0), LocalDateTime.of(2024, 12, 31, 15, 0), null),
+                new Task("task2", "Write Documentation", "Write API documentation for the project using Swagger", TaskStatus.RUNNING, Priority.LOW, "team123", List.of("creator@gmail.com"), "creator@gmail.com", LocalDateTime.of(2025, 1, 2, 10, 0), LocalDateTime.of(2025, 1, 1, 16, 0), null)
+        );
+        Team dbTeam = new Team(
+                "team123",
+                "Original Team",
+                tasks,
+                new ArrayList<>(List.of("creator@gmail.com")),
+                "creator@gmail.com");
+
+        LeaveTeamRequest request = new LeaveTeamRequest("creator@gmail.com", "team123");
+
+
+        when(teamRepository.findById(request.getTeamId())).thenReturn(Optional.of(dbTeam));
+        when(userRepository.findByEmailIn(dbTeam.getCollaboratorsEmails())).thenReturn(List.of(
+                new User("1", "creator@gmail.com", "Test User 1", "password123", List.of(), new ArrayList<>(), List.of("team123"))
+        ));
+
+        teamService.leaveTeam(request);
+
+        verify(teamRepository, times(1)).findById(anyString());
+        verify(userRepository, times(1)).findByEmailIn(anyList());
+        verify(teamRepository, times(1)).delete(any(Team.class));
+        verify(userRepository, times(1)).saveAll(anyList());
+        verify(taskRepository, times(1)).deleteAll(anyList());
+    }
+
+    @Test
+    void leaveTeam_invalidId() {
+        LeaveTeamRequest request = new LeaveTeamRequest("creator@gmail.com", "team123");
+
+        when(teamRepository.findById(request.getTeamId())).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> teamService.leaveTeam(request));
     }
 }

@@ -30,3 +30,18 @@ public class Task {
     private LocalDateTime createdAt;
     private LocalDateTime finishedAt;
 }
+
+
+//new Task(
+//    "task1",
+//            "Implement Authentication",
+//            "Design and implement user authentication using Spring Security",
+//    TaskStatus.IN_PROGRESS,
+//    Priority.HIGH,
+//    "team123",
+//    List.of("user1@gmail.com", "user2@gmail.com"),
+//    "creator@gmail.com",
+//            LocalDateTime.of(2025, 1, 1, 9, 0),
+//    LocalDateTime.of(2024, 12, 31, 15, 0),
+//    null
+//            )

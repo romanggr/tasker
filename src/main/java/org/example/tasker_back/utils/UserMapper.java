@@ -50,6 +50,7 @@ public class UserMapper {
 
         user.setFullName(request.getFullName() == null || request.getFullName().isEmpty() ? user.getFullName() : request.getFullName());
         user.setEmail(request.getEmail() == null || request.getEmail().isEmpty() ? user.getEmail() : request.getEmail());
+        user.setRoles(request.getRoles() == null || request.getRoles().isEmpty() ? user.getRoles() : request.getRoles());
 
         return user;
     }

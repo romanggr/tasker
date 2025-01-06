@@ -2,7 +2,6 @@ package org.example.tasker_back.repository;
 
 import org.example.tasker_back.enums.TaskStatus;
 import org.example.tasker_back.model.Task;
-import org.example.tasker_back.model.User;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 
@@ -14,4 +13,7 @@ public interface TaskRepository extends MongoRepository<Task, String> {
 
     @Query("{ 'teamId': ?0, 'status': ?1 }")
     List<Task> findByTeamIdAndStatus(String teamId, TaskStatus status);
+
+    @Query("{ 'collaboratorsEmails': ?0 }")
+    List<Task> findByCollaboratorsEmail(String email);
 }

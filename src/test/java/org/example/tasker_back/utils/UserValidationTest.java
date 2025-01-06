@@ -34,18 +34,14 @@ public class UserValidationTest {
     void isValidEmail_empty() {
         String invalidEmail = "";
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            UserValidation.isValidEmail(invalidEmail);
-        });
+        assertThrows(IllegalArgumentException.class, () -> UserValidation.isValidEmail(invalidEmail));
     }
 
     @Test
     void isValidEmail_invalid() {
         String invalidEmail = "invalid-email";
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            UserValidation.isValidEmail(invalidEmail);
-        });
+        assertThrows(IllegalArgumentException.class, () -> UserValidation.isValidEmail(invalidEmail));
     }
 
     @Test
@@ -74,9 +70,7 @@ public class UserValidationTest {
 
         when(userRepository.existsByEmail(newEmail)).thenReturn(true);
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            UserValidation.isEmailInUse(newEmail, currentEmail, userRepository);
-        });
+        assertThrows(IllegalArgumentException.class, () -> UserValidation.isEmailInUse(newEmail, currentEmail, userRepository));
         verify(userRepository).existsByEmail(newEmail);
     }
 
@@ -91,36 +85,28 @@ public class UserValidationTest {
     void isValidPassword_empty() {
         String invalidPassword = "";
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            UserValidation.isValidPassword(invalidPassword);
-        });
+        assertThrows(IllegalArgumentException.class, () -> UserValidation.isValidPassword(invalidPassword));
     }
 
     @Test
     void isValidPassword_short() {
         String invalidPassword = "asq";
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            UserValidation.isValidPassword(invalidPassword);
-        });
+        assertThrows(IllegalArgumentException.class, () -> UserValidation.isValidPassword(invalidPassword));
     }
 
     @Test
     void isValidPassword_oneDigit() {
         String invalidPassword = "students";
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            UserValidation.isValidPassword(invalidPassword);
-        });
+        assertThrows(IllegalArgumentException.class, () -> UserValidation.isValidPassword(invalidPassword));
     }
 
     @Test
     void isValidPassword_oneLetter() {
         String invalidPassword = "12345678";
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            UserValidation.isValidPassword(invalidPassword);
-        });
+        assertThrows(IllegalArgumentException.class, () -> UserValidation.isValidPassword(invalidPassword));
     }
 
     @Test
@@ -134,9 +120,7 @@ public class UserValidationTest {
     void isValidName_empty() {
         String name = "";
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            UserValidation.isValidName(name);
-        });
+        assertThrows(IllegalArgumentException.class, () -> UserValidation.isValidName(name));
 
     }
 
@@ -225,7 +209,8 @@ public class UserValidationTest {
         UpdateUserRequest request = new UpdateUserRequest(
                 "idlalalla",
                 "test@gmail.com",
-                "Tom Holland"
+                "Tom Holland",
+                null
         );
 
         when(userRepository.existsByEmail(request.getEmail())).thenReturn(false);
@@ -238,7 +223,8 @@ public class UserValidationTest {
         UpdateUserRequest request = new UpdateUserRequest(
                 "idlalalla",
                 "test@gmail.com",
-                "Tom Holland"
+                "Tom Holland",
+                null
         );
 
         when(userRepository.existsByEmail(request.getEmail())).thenReturn(true);
@@ -253,7 +239,8 @@ public class UserValidationTest {
         UpdateUserRequest request = new UpdateUserRequest(
                 "idlalalla",
                 "invalid-email",
-                "Tom Holland"
+                "Tom Holland",
+                null
         );
 
         assertThrows(IllegalArgumentException.class, () ->
@@ -267,7 +254,8 @@ public class UserValidationTest {
         UpdateUserRequest request = new UpdateUserRequest(
                 "idlalalla",
                 "test@gmail.com",
-                ""
+                "",
+                null
         );
 
         assertThrows(IllegalArgumentException.class, () ->

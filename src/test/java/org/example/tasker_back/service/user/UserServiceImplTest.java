@@ -46,7 +46,7 @@ class UserServiceImplTest {
         User testUser = new User("123", "testEmail@email.com",
                 "User 1", "password123", List.of(Role.DESIGNER, Role.BIG_DATA), List.of("1a233"), List.of("ewe233"));
 
-        UpdateUserRequest request = new UpdateUserRequest("123", "newEmail@gmail.com", "Romik");
+        UpdateUserRequest request = new UpdateUserRequest("123", "newEmail@gmail.com", "Romik", List.of(Role.DESIGNER));
 
         when(userRepository.findById(request.getId())).thenReturn(Optional.of(testUser));
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -57,6 +57,7 @@ class UserServiceImplTest {
         assertEquals("jwt", response.getToken());
         assertEquals("newEmail@gmail.com", response.getUserDto().getEmail());
         assertEquals("Romik", response.getUserDto().getFullName());
+        assertEquals(1, response.getUserDto().getRoles().size());
 
         verify(userRepository, times(1)).findById(request.getId());
         verify(userRepository, times(2)).save(any());
@@ -69,7 +70,7 @@ class UserServiceImplTest {
 
     @Test
     void updateUser_invalidUserId() {
-        UpdateUserRequest request = new UpdateUserRequest("123", "newEmail@gmail.com", "Romik");
+        UpdateUserRequest request = new UpdateUserRequest("123", "newEmail@gmail.com", "Romik", null);
 
         when(userRepository.findById(request.getId())).thenReturn(Optional.empty());
 
@@ -81,7 +82,7 @@ class UserServiceImplTest {
 
     @Test
     void updateUser_invalidEmail() {
-        UpdateUserRequest request = new UpdateUserRequest("123", "newEmail", "Romik");
+        UpdateUserRequest request = new UpdateUserRequest("123", "newEmail", "Romik", null);
 
         assertThrows(IllegalArgumentException.class, () -> userService.updateUser(request));
 
@@ -95,7 +96,7 @@ class UserServiceImplTest {
         User testUser = new User("123", "testEmail@email.com",
                 "User 1", "password123", List.of(Role.DESIGNER, Role.BIG_DATA), null, null);
 
-        UpdateUserRequest request = new UpdateUserRequest("123", "newEmail@gmail.com", "Romik");
+        UpdateUserRequest request = new UpdateUserRequest("123", "newEmail@gmail.com", "Romik", List.of(Role.BIG_DATA));
 
         when(userRepository.findById(request.getId())).thenReturn(Optional.of(testUser));
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -106,6 +107,7 @@ class UserServiceImplTest {
         assertEquals("jwt", response.getToken());
         assertEquals("newEmail@gmail.com", response.getUserDto().getEmail());
         assertEquals("Romik", response.getUserDto().getFullName());
+        assertEquals(1, response.getUserDto().getRoles().size());
 
         verify(userRepository, times(1)).findById(request.getId());
         verify(userRepository, times(2)).save(any());
@@ -123,7 +125,7 @@ class UserServiceImplTest {
         User testUser = new User("123", "testEmail@email.com",
                 "User 1", "password123", List.of(Role.DESIGNER, Role.BIG_DATA), null, null);
 
-        UpdateUserRequest request = new UpdateUserRequest("123", "testEmail@email.com", "Romik");
+        UpdateUserRequest request = new UpdateUserRequest("123", "testEmail@email.com", "Romik", null);
 
         when(userRepository.findById(request.getId())).thenReturn(Optional.of(testUser));
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));

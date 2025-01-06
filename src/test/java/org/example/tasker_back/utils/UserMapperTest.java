@@ -72,7 +72,6 @@ public class UserMapperTest {
     }
 
 
-
     @Test
     void toDto_success() {
         User newUser = new User("id1234", "john.doe@example.com",
@@ -101,19 +100,19 @@ public class UserMapperTest {
     }
 
 
-
     @Test
     void updateUser_success() {
         User user = new User("id1234", "john.doe@example.com", "John Doe", "password123",
                 List.of(Role.ACCOUNTANT, Role.DESIGNER), List.of("idTask1", "idTask2"), List.of("team1", "team31"));
 
-        UpdateUserRequest request = new UpdateUserRequest("id123", "doe@example.com", "Doe John");
+        UpdateUserRequest request = new UpdateUserRequest("id123", "doe@example.com", "Doe John", List.of(Role.DESIGNER));
 
         User updatedUser = UserMapper.updateUser(request, user);
 
         assertNotNull(updatedUser);
         assertEquals("doe@example.com", updatedUser.getEmail());
         assertEquals("Doe John", updatedUser.getFullName());
+        assertEquals(1, updatedUser.getRoles().size());
     }
 
     @Test
@@ -126,12 +125,14 @@ public class UserMapperTest {
         User user = new User("id1234", "john.doe@example.com", "John Doe", "password123",
                 List.of(Role.ACCOUNTANT, Role.DESIGNER), List.of("idTask1", "idTask2"), List.of("team1", "team31"));
 
-        UpdateUserRequest request = new UpdateUserRequest("id123", null, null);
+        UpdateUserRequest request = new UpdateUserRequest("id123", null, null, null);
 
         User updatedUser = UserMapper.updateUser(request, user);
 
         assertNotNull(updatedUser);
         assertEquals("john.doe@example.com", updatedUser.getEmail());
         assertEquals("John Doe", updatedUser.getFullName());
+        assertEquals(2, updatedUser.getRoles().size());
+
     }
 }

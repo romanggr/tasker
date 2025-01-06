@@ -36,6 +36,8 @@ public class TeamServiceImpl implements TeamService {
         return teamRepository.findByCollaboratorsEmailsContaining(userEmail);
     }
 
+
+
     @Transactional
     @Override
     public Team createTeam(CreateTeamRequest request) {
@@ -66,6 +68,8 @@ public class TeamServiceImpl implements TeamService {
 
         userRepository.saveAll(users);
     }
+
+
 
     @Transactional
     @Override
@@ -136,6 +140,7 @@ public class TeamServiceImpl implements TeamService {
     }
 
 
+
     @Transactional
     @Override
     public void deleteTeam(DeleteTeamRequest request) {
@@ -146,25 +151,38 @@ public class TeamServiceImpl implements TeamService {
             throw new IllegalArgumentException("Only creator can delete team");
         }
 
-        // Delete all tasks associated with the team
-        List<Task> tasks = dbTeam.getTasks();
-        if (tasks != null && !tasks.isEmpty()) {
-            taskRepository.deleteAll(tasks);
-        }
+        deleteDataInUser(dbTeam);
+        deleteTasks(dbTeam);
+        teamRepository.delete(dbTeam);
+    }
 
-        List<String> collaboratorEmails = dbTeam.getCollaboratorsEmails();
-        List<User> collaborators = userRepository.findByEmailIn(collaboratorEmails);
+    private void deleteDataInUser(Team dbTeam) {
+        List<User> collaborators = userRepository.findByEmailIn(dbTeam.getCollaboratorsEmails());
+        List<String> tasksIds = dbTeam.getTasks().stream().map(Task::getId).toList();
 
-        // Remove the team from collaborators' teamIds
         for (User user : collaborators) {
             user.setTeamIds(user.getTeamIds().stream()
                     .filter(teamId -> !teamId.equals(dbTeam.getId()))
                     .collect(Collectors.toList()));
+
+            if (user.getTaskIds() != null && !user.getTaskIds().isEmpty()) {
+                user.setTaskIds(user.getTaskIds().stream()
+                        .filter(tasksIds::contains)
+                        .collect(Collectors.toList()));
+            }
         }
 
         userRepository.saveAll(collaborators);
-        teamRepository.delete(dbTeam);
     }
+
+
+    private void deleteTasks(Team dbTeam) {
+        List<Task> tasks = dbTeam.getTasks();
+        if (tasks != null && !tasks.isEmpty()) {
+            taskRepository.deleteAll(tasks);
+        }
+    }
+
 
 
     @Override
@@ -173,48 +191,45 @@ public class TeamServiceImpl implements TeamService {
         Team dbTeam = teamRepository.findById(request.getTeamId())
                 .orElseThrow(() -> new EntityNotFoundException("Team not found by this id"));
 
-        Team oldDbTeam = new Team(
-                dbTeam.getId(),
-                dbTeam.getName(),
-                new ArrayList<>(dbTeam.getTasks()),
-                new ArrayList<>(dbTeam.getCollaboratorsEmails()),
-                dbTeam.getCreatorEmail()
-        );
-
-        // Handle the case when the creator is leaving
         if (request.getUserEmail().equals(dbTeam.getCreatorEmail())) {
-            if (dbTeam.getCollaboratorsEmails() != null && dbTeam.getCollaboratorsEmails().size() == 1) {
-                teamRepository.delete(dbTeam);
+            List<String> collaborators = dbTeam.getCollaboratorsEmails();
+            if (collaborators.size() > 1) {
+                dbTeam.setCreatorEmail(collaborators.get(0).equals(dbTeam.getCreatorEmail()) ? collaborators.get(1) : collaborators.get(0));
+                deleteDataInUser(dbTeam);
+                deleteUserIdInTask(request.getUserEmail());
+                deleteUserIdInTeam(request.getUserEmail());
             } else {
-                String newCreatorEmail = dbTeam.getCollaboratorsEmails().get(0);
-                dbTeam.setCreatorEmail(newCreatorEmail);
-
-                List<String> newCollaborators = dbTeam.getCollaboratorsEmails().stream()
-                        .filter(email -> !email.equals(request.getUserEmail()))
-                        .collect(Collectors.toList());
-                dbTeam.setCollaboratorsEmails(newCollaborators);
+                deleteDataInUser(dbTeam);
+                deleteTasks(dbTeam);
+                teamRepository.delete(dbTeam);
             }
         } else {
-            // Handle the case when a collaborator (not the creator) is leaving
-            dbTeam.setCollaboratorsEmails(dbTeam.getCollaboratorsEmails().stream()
-                    .filter(email -> !email.equals(request.getUserEmail()))
-                    .collect(Collectors.toList()));
+            deleteDataInUser(dbTeam);
+            deleteUserIdInTask(request.getUserEmail());
+            deleteUserIdInTeam(request.getUserEmail());
         }
-
-        List<String> collaboratorEmails = oldDbTeam.getCollaboratorsEmails();
-        List<User> collaborators = userRepository.findByEmailIn(collaboratorEmails);
-
-        for (User user : collaborators) {
-            user.setTeamIds(user.getTeamIds().stream()
-                    .filter(teamId -> !teamId.equals(oldDbTeam.getId()))
-                    .collect(Collectors.toList()));
-        }
-
-        userRepository.saveAll(collaborators);
-        teamRepository.save(dbTeam);
     }
 
+    private void deleteUserIdInTeam(String userEmail) {
+        List<Team> teams = teamRepository.findByCollaboratorsEmailsContaining(userEmail);
+
+        for (Team team : teams) {
+            team.setCollaboratorsEmails(team.getCollaboratorsEmails().stream()
+                    .filter(email -> !email.equals(userEmail))
+                    .collect(Collectors.toList()));
+        }
+        teamRepository.saveAll(teams);
+    }
+
+    private void deleteUserIdInTask(String userEmail) {
+        List<Task> tasks = taskRepository.findByCollaboratorsEmail(userEmail);
+
+        for (Task task : tasks) {
+            task.setCollaboratorsEmails(task.getCollaboratorsEmails().stream()
+                    .filter(email -> !email.equals(userEmail))
+                    .collect(Collectors.toList()));
+        }
+        taskRepository.saveAll(tasks);
+    }
 
 }
-
-// todo when delete delete task or team delete also user and task or team

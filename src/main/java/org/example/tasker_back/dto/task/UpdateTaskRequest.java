@@ -18,6 +18,5 @@ public class UpdateTaskRequest {
     private String description;
     private Priority priority;
     private List<String> collaboratorsEmails;
-    private String creatorEmail;
     private LocalDateTime startsAt;
 }
