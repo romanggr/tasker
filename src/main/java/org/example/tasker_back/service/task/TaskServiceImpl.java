@@ -64,7 +64,12 @@ public class TaskServiceImpl implements TaskService {
     public Task createTask(CreateTaskRequest request) {
         checkUserInTeam(request.getTeamId(), request.getCreatorEmail());
 
-        return taskRepository.save(TaskMapper.toEntityCreate(request));
+        if (!request.getCollaboratorsEmails().contains(request.getCreatorEmail())) {
+            request.getCollaboratorsEmails().add(request.getCreatorEmail());
+        }
+
+        Task taskEntity = TaskMapper.toEntityCreate(request);
+        return taskRepository.save(taskEntity);
     }
 
     @Override
@@ -73,18 +78,25 @@ public class TaskServiceImpl implements TaskService {
 
         Task task = taskRepository.findById(request.getTaskId())
                 .orElseThrow(() -> new IllegalArgumentException("Task with this id not found"));
+
+        if (task.getStatus() == TaskStatus.FINISHED || task.getFinishedAt() != null)
+            throw new RuntimeException("Task is already finished");
+
         task.setFinishedAt(LocalDateTime.now());
         task.setStatus(TaskStatus.FINISHED);
 
         return taskRepository.save(task);
     }
 
+
     @Override
     public Task updateTask(UpdateTaskRequest request) {
-        checkUserInTeam(request.getTeamId(), request.getUserEmail());
-
         Task task = taskRepository.findById(request.getTaskId())
                 .orElseThrow(() -> new IllegalArgumentException("Task with this id not found"));
+
+        if (!task.getCollaboratorsEmails().contains(request.getUserEmail()))
+            throw new IllegalArgumentException("Only collaborators can update tasks");
+
         Task updatedTask = TaskMapper.toEntityUpdate(request, task);
 
         return taskRepository.save(updatedTask);
@@ -98,7 +110,8 @@ public class TaskServiceImpl implements TaskService {
         return task.getCollaboratorsEmails();
     }
 
-    private void checkUserInTeam(String email, String teamId) {
+
+    private void checkUserInTeam(String teamId, String email) {
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new IllegalArgumentException("Team with this id not found"));
 

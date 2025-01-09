@@ -35,9 +35,12 @@ public class TaskMapper {
 
     public static Task toEntityUpdate(UpdateTaskRequest request, Task task) {
         if (request == null) throw new IllegalArgumentException("Request is null");
+        if (request.getDescription() == null || request.getDescription().isEmpty())
+            throw new IllegalArgumentException("Request description is null");
+        if (request.getPriority() == null) throw new IllegalArgumentException("Request priority is null");
+        if (request.getStartsAt() == null) throw new IllegalArgumentException("Request start time is null");
 
-        task.setDescription(request.getDescription() == null || request.getDescription().isEmpty() ? task.getDescription() : request.getDescription());
-        task.setName(request.getName() == null || request.getName().isEmpty() ? task.getName() : request.getName());
+        task.setDescription(request.getDescription());
         task.setPriority(request.getPriority() == null ? task.getPriority() : request.getPriority());
         task.setStartsAt(request.getStartsAt() == null ? task.getStartsAt() : request.getStartsAt());
 

@@ -32,16 +32,6 @@ public class Task {
 }
 
 
-//new Task(
-//    "task1",
-//            "Implement Authentication",
-//            "Design and implement user authentication using Spring Security",
-//    TaskStatus.IN_PROGRESS,
-//    Priority.HIGH,
-//    "team123",
-//    List.of("user1@gmail.com", "user2@gmail.com"),
-//    "creator@gmail.com",
-//            LocalDateTime.of(2025, 1, 1, 9, 0),
-//    LocalDateTime.of(2024, 12, 31, 15, 0),
-//    null
-//            )
+//User user = new User("123", "user1@email.com", "User 1", "ssrgsergsdfg23", new ArrayList<>(List.of(Role.DESIGNER, Role.BIG_DATA)), new ArrayList<>(List.of("1")), new ArrayList<>(List.of("1")));
+//Task task = new Task("1", "Implement Authentication", "Design and implement user authentication using Spring Security", TaskStatus.RUNNING, Priority.HIGH, "1", new ArrayList<>(List.of("user1@gmail.com", "user2@gmail.com")), "creator@gmail.com", LocalDateTime.of(2025, 1, 1, 9, 0), LocalDateTime.of(2024, 12, 31, 15, 0), null);
+//Team dbTeam = new Team("team123", "Original Team", List.of(), new ArrayList<>(List.of("creator@gmail.com", "user1@email.com")), "creator@gmail.com");
