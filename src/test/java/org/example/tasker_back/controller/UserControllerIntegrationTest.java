@@ -58,6 +58,8 @@ class UserControllerIntegrationTest extends IntegrationTest {
     @BeforeEach
     void cleanDatabase() {
         userRepository.deleteAll();
+        taskRepository.deleteAll();
+        teamRepository.deleteAll();
     }
 
 
