@@ -1,4 +1,4 @@
-package org.example.tasker_back.controller.user;
+package org.example.tasker_back.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.example.tasker_back.dto.user.*;
