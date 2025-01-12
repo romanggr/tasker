@@ -36,7 +36,7 @@ public class UserServiceImpl implements UserService {
 
         UserValidation.isValidUpdatingPassword(request, userDb.getPassword());
 
-        userDb.setPassword(BCrypt.hashpw(request.getCurrentPassword(), BCrypt.gensalt()));
+        userDb.setPassword(BCrypt.hashpw(request.getNewPassword(), BCrypt.gensalt()));
         userRepository.save(userDb);
 
         return AuthResponse.builder()
