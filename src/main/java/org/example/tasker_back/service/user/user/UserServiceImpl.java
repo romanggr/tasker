@@ -19,6 +19,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -52,12 +54,10 @@ public class UserServiceImpl implements UserService {
         User userDb = userRepository.findById(request.getId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        UserValidation.isValidUpdatingUser(request, userDb.getEmail(), userRepository);
-
-        userRepository.save(UserMapper.updateUser(request, userDb));
-
         updateUserInTeam(userDb.getEmail(), request.getEmail(), userDb.getTeamIds());
         updateUserInTask(userDb.getEmail(), request.getEmail(), userDb.getTaskIds());
+
+        UserValidation.isValidUpdatingUser(request, userDb.getEmail(), userRepository);
 
         User updatedUser = userRepository.save(UserMapper.updateUser(request, userDb));
         return AuthResponse.builder()
@@ -72,9 +72,14 @@ public class UserServiceImpl implements UserService {
         List<Team> teams = teamRepository.findAllById(teamsIds);
 
         teams.forEach(team -> {
-            List<String> collaboratorsEmails = team.getCollaboratorsEmails();
-            if (collaboratorsEmails != null) {
-                collaboratorsEmails.replaceAll(email -> email.equals(oldEmail) ? newEmail : email);
+            List<String> updatedCollaborators = team.getCollaboratorsEmails().stream()
+                    .map(email -> email.equals(oldEmail) ? newEmail : email)
+                    .collect(Collectors.toList());
+            System.out.println(updatedCollaborators);
+            team.setCollaboratorsEmails(updatedCollaborators);
+
+            if (Objects.equals(team.getCreatorEmail(), oldEmail)) {
+                team.setCreatorEmail(newEmail);
             }
         });
 
@@ -85,10 +90,14 @@ public class UserServiceImpl implements UserService {
         if (tasksIds == null || tasksIds.isEmpty()) return;
         List<Task> tasks = taskRepository.findAllById(tasksIds);
 
-        tasks.forEach(team -> {
-            List<String> collaboratorsEmails = team.getCollaboratorsEmails();
-            if (collaboratorsEmails != null) {
-                collaboratorsEmails.replaceAll(email -> email.equals(oldEmail) ? newEmail : email);
+        tasks.forEach(task -> {
+            List<String> updatedCollaborators = task.getCollaboratorsEmails().stream()
+                    .map(email -> email.equals(oldEmail) ? newEmail : email)
+                    .collect(Collectors.toList());
+            task.setCollaboratorsEmails(updatedCollaborators);
+
+            if (Objects.equals(task.getCreatorEmail(), oldEmail)) {
+                task.setCreatorEmail(newEmail);
             }
         });
 
