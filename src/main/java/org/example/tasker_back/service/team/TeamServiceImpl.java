@@ -37,7 +37,6 @@ public class TeamServiceImpl implements TeamService {
     }
 
 
-
     @Transactional
     @Override
     public Team createTeam(CreateTeamRequest request) {
@@ -115,7 +114,6 @@ public class TeamServiceImpl implements TeamService {
             }
         }
 
-
         for (String email : newUsersEmails) {
             boolean isInDb = false;
             for (User user : usersFromTeam) {
@@ -158,7 +156,6 @@ public class TeamServiceImpl implements TeamService {
 
     private void deleteDataInUser(Team dbTeam) {
         List<User> collaborators = userRepository.findByEmailIn(dbTeam.getCollaboratorsEmails());
-        List<String> tasksIds = dbTeam.getTasks().stream().map(Task::getId).toList();
 
         for (User user : collaborators) {
             user.setTeamIds(user.getTeamIds().stream()
@@ -167,7 +164,7 @@ public class TeamServiceImpl implements TeamService {
 
             if (user.getTaskIds() != null && !user.getTaskIds().isEmpty()) {
                 user.setTaskIds(user.getTaskIds().stream()
-                        .filter(tasksIds::contains)
+                        .filter(taskId -> !user.getTaskIds().contains(taskId))
                         .collect(Collectors.toList()));
             }
         }

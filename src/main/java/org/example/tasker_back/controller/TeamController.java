@@ -26,7 +26,7 @@ public class TeamController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<Team> getUserTeams(@RequestBody CreateTeamRequest request) {
+    public ResponseEntity<Team> createTeam(@RequestBody CreateTeamRequest request) {
         Team response = teamService.createTeam(request);
         return ResponseEntity.ok(response);
     }
