@@ -12,6 +12,7 @@ import org.example.tasker_back.repository.TeamRepository;
 import org.example.tasker_back.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mindrot.jbcrypt.BCrypt;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -224,23 +225,38 @@ class TaskServiceImplTest {
 
     @Test
     void createTask_success() {
-        CreateTaskRequest request = new CreateTaskRequest("1", "Implement Feature X", "Develop and integrate feature X into the system", Priority.HIGH, new ArrayList<>(List.of("user2@gmail.com")), "user1@gmail.com", LocalDateTime.of(2025, 1, 15, 10, 0));
-        Team dbTeam = new Team("1", "Original Team", List.of(), new ArrayList<>(List.of("creator@gmail.com", "user1@gmail.com")), "creator@gmail.com");
+        CreateTaskRequest request = new CreateTaskRequest("team1", "Super task", "Random description", Priority.HIGHEST, new ArrayList<>(List.of("user1@email.com", "user10@email.com", "user100@email.com")), "user2@email.com", LocalDateTime.of(2025, 1, 1, 9, 0));
 
-        when(teamRepository.findById(request.getTeamId())).thenReturn(Optional.of(dbTeam));
-        when(taskRepository.save(any())).thenAnswer(invocation -> {
-            Task task = invocation.getArgument(0);
-            task.setId("1");
-            return task;
-        });
+        User user1 = new User("user1", "user1@email.com", "User 1", BCrypt.hashpw("hashedPassword123", BCrypt.gensalt()), new ArrayList<>(List.of(Role.DESIGNER, Role.BIG_DATA)), new ArrayList<>(List.of("task1", "task2")), new ArrayList<>(List.of("team1")));
+        User user2 = new User("user2", "user2@email.com", "User 2", BCrypt.hashpw("hashedPassword123", BCrypt.gensalt()), new ArrayList<>(List.of(Role.ACCOUNTANT, Role.DEVELOPER)), new ArrayList<>(List.of("task1", "task2")), new ArrayList<>(List.of("team1")));
+        Task task1 = new Task("task1", "Implement Authentication", "Design and implement user authentication using Spring Security", TaskStatus.RUNNING, Priority.HIGH, "team1", new ArrayList<>(List.of("user1@email.com", "user2@email.com")), "user1@email.com", LocalDateTime.of(2025, 1, 1, 9, 0), LocalDateTime.of(2024, 12, 31, 15, 0), null);
+        Task task2 = new Task("task2", "Create User Dashboard", "Develop a frontend dashboard for users to view their tasks and teams.", TaskStatus.FINISHED, Priority.MEDIUM, "team1", new ArrayList<>(List.of("user1@email.com", "user2@email.com")), "user2@email.com", LocalDateTime.of(2025, 2, 5, 10, 0), LocalDateTime.of(2025, 2, 10, 17, 0), LocalDateTime.of(2025, 2, 9, 15, 0));
+        Team team1 = new Team("team1", "Original Team", new ArrayList<>(List.of(task1, task2)), new ArrayList<>(List.of("user1@email.com", "user2@email.com")), "user1@email.com");
+        Task newTask = new Task("task10", "newTask", "Design and implement user authentication using Spring Security", TaskStatus.RUNNING, Priority.HIGH, "team1", new ArrayList<>(List.of("user1@email.com", "user2@email.com")), "user1@email.com", LocalDateTime.of(2025, 1, 1, 9, 0), LocalDateTime.of(2024, 12, 31, 15, 0), null);
+
+        when(teamRepository.findById(request.getTeamId())).thenReturn(Optional.of(team1));
+        when(taskRepository.save(any())).thenReturn(newTask);
+        when(userRepository.findByEmailIn(any())).thenReturn(new ArrayList<>(List.of(user1, user2)));
 
         Task response = taskService.createTask(request);
 
         assertNotNull(response);
-        assertEquals("1", response.getId());
+        assertEquals("task10", response.getId());
         assertEquals(2, response.getCollaboratorsEmails().size());
-        verify(teamRepository, times(1)).findById(request.getTeamId());
-        verify(taskRepository, times(1)).save(any());
+        assertEquals(response.getTeamId(), request.getTeamId());
+        assertNotNull(response.getDescription());
+        assertNotNull(response.getCreatedAt());
+        assertNotNull(response.getPriority());
+        assertNotNull(response.getStatus());
+        assertNotNull(response.getName());
+        assertNotNull(response.getCreatorEmail());
+
+        verify(teamRepository, times(2)).findById(request.getTeamId());
+        verify(taskRepository, times(2)).save(any());
+        verify(userRepository, times(1)).saveAll(any());
+        verify(userRepository, times(1)).findByEmailIn(any());
+        verify(teamRepository, times(1)).save(any());
+
     }
 
     @Test
@@ -263,6 +279,24 @@ class TaskServiceImplTest {
         assertThrows(IllegalArgumentException.class, () -> taskService.createTask(request));
 
         verify(teamRepository, times(1)).findById(request.getTeamId());
+    }
+
+    @Test
+    void createTask_creatorNotInTeam() {
+        CreateTaskRequest request = new CreateTaskRequest("team1", "Super task", "Random description", Priority.HIGHEST, new ArrayList<>(List.of("user1@email.com", "user10@email.com", "user100@email.com")), "user22@email.com", LocalDateTime.of(2025, 1, 1, 9, 0));
+        Task task1 = new Task("task1", "Implement Authentication", "Design and implement user authentication using Spring Security", TaskStatus.RUNNING, Priority.HIGH, "team1", new ArrayList<>(List.of("user1@email.com", "user2@email.com")), "user1@email.com", LocalDateTime.of(2025, 1, 1, 9, 0), LocalDateTime.of(2024, 12, 31, 15, 0), null);
+        Task task2 = new Task("task2", "Create User Dashboard", "Develop a frontend dashboard for users to view their tasks and teams.", TaskStatus.FINISHED, Priority.MEDIUM, "team1", new ArrayList<>(List.of("user1@email.com", "user2@email.com")), "user2@email.com", LocalDateTime.of(2025, 2, 5, 10, 0), LocalDateTime.of(2025, 2, 10, 17, 0), LocalDateTime.of(2025, 2, 9, 15, 0));
+        Team team1 = new Team("team1", "Original Team", new ArrayList<>(List.of(task1, task2)), new ArrayList<>(List.of("user1@email.com", "user2@email.com")), "user1@email.com");
+
+        when(teamRepository.findById(request.getTeamId())).thenReturn(Optional.of(team1));
+
+        assertThrows(IllegalArgumentException.class, () -> taskService.createTask(request));
+
+        verify(teamRepository, times(1)).findById(request.getTeamId());
+        verify(taskRepository, never()).save(any());
+        verify(userRepository, never()).saveAll(any());
+        verify(userRepository, never()).findByEmailIn(any());
+        verify(teamRepository, never()).save(any());
     }
 
 
@@ -364,7 +398,7 @@ class TaskServiceImplTest {
 
     @Test
     void updateTask_invalidTaskId() {
-       UpdateTaskRequest updateTaskRequest = new UpdateTaskRequest("2", "user1@email.com", "1", "Develop and integrate feature Y into the system", Priority.LOW, LocalDateTime.of(2025, 1, 15, 10, 0));
+        UpdateTaskRequest updateTaskRequest = new UpdateTaskRequest("2", "user1@email.com", "1", "Develop and integrate feature Y into the system", Priority.LOW, LocalDateTime.of(2025, 1, 15, 10, 0));
 
         when(taskRepository.findById(updateTaskRequest.getTaskId())).thenReturn(Optional.empty());
 
@@ -375,7 +409,7 @@ class TaskServiceImplTest {
     }
 
     @Test
-    void updateTask_userNotCollaborator(){
+    void updateTask_userNotCollaborator() {
         Task task = new Task("1", "Implement Authentication", "Design and implement user authentication using Spring Security", TaskStatus.RUNNING, Priority.HIGH, "2", new ArrayList<>(List.of("user1@email.com", "user2@gmail.com")), "creator@gmail.com", LocalDateTime.of(2025, 1, 1, 9, 0), LocalDateTime.of(2024, 12, 31, 15, 0), null);
         UpdateTaskRequest updateTaskRequest = new UpdateTaskRequest("2", "user1123@email.com", "1", "Develop and integrate feature Y into the system", Priority.LOW, LocalDateTime.of(2025, 1, 15, 10, 0));
 
@@ -388,9 +422,8 @@ class TaskServiceImplTest {
     }
 
 
-
     @Test
-    void getTaskCollaborators_success(){
+    void getTaskCollaborators_success() {
         String taskId = "1";
         Task task = new Task("1", "Implement Authentication", "Design and implement user authentication using Spring Security", TaskStatus.RUNNING, Priority.HIGH, "2", new ArrayList<>(List.of("user1@email.com", "user2@gmail.com", "creator@gmail.com")), "creator@gmail.com", LocalDateTime.of(2025, 1, 1, 9, 0), LocalDateTime.of(2024, 12, 31, 15, 0), null);
 
@@ -404,7 +437,7 @@ class TaskServiceImplTest {
     }
 
     @Test
-    void getTaskCollaborators_invalidTaskId(){
+    void getTaskCollaborators_invalidTaskId() {
         String taskId = "1";
 
         when(taskRepository.findById(taskId)).thenReturn(Optional.empty());

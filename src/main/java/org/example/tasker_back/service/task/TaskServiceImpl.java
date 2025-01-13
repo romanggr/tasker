@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -34,7 +35,6 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public List<Task> getTasksFromTeamByStatus(TasksByStatusRequest request) {
         checkUserInTeam(request.getTeamId(), request.getUserEmail());
-
         return taskRepository.findByTeamIdAndStatus(request.getTeamId(), request.getStatus());
     }
 
@@ -60,16 +60,49 @@ public class TaskServiceImpl implements TaskService {
         return taskToUpdate;
     }
 
+
+    @Transactional
     @Override
     public Task createTask(CreateTaskRequest request) {
         checkUserInTeam(request.getTeamId(), request.getCreatorEmail());
+
+        Team team = teamRepository.findById(request.getTeamId()).orElseThrow(() -> new IllegalArgumentException("Team with this id not found"));
 
         if (!request.getCollaboratorsEmails().contains(request.getCreatorEmail())) {
             request.getCollaboratorsEmails().add(request.getCreatorEmail());
         }
 
         Task taskEntity = TaskMapper.toEntityCreate(request);
-        return taskRepository.save(taskEntity);
+        Task taskDb = taskRepository.save(taskEntity);
+
+        List<String> verifiedUserEmails = addInUser(taskDb); // This part adds a taskId to Users and checks whether users are in the task team. Those who are not in the team are removed
+        taskDb.setCollaboratorsEmails(verifiedUserEmails);
+
+        addInTeam(taskDb, team); // this part add taskId to Team
+
+        return taskRepository.save(taskDb);
+    }
+
+    private void addInTeam(Task task, Team team) {
+        team.getTasks().add(task);
+        teamRepository.save(team);
+    }
+
+    private List<String> addInUser(Task task) {
+        List<String> verifiedUserEmails = new ArrayList<>();
+        List<User> usersToSave = new ArrayList<>();
+        List<User> users = userRepository.findByEmailIn(task.getCollaboratorsEmails());
+
+        for (User user : users) {
+            if (user.getTeamIds().contains(task.getTeamId())) {
+                user.getTaskIds().add(task.getId());
+                verifiedUserEmails.add(user.getEmail());
+                usersToSave.add(user);
+            }
+        }
+
+        userRepository.saveAll(usersToSave);
+        return verifiedUserEmails;
     }
 
     @Override
@@ -101,6 +134,8 @@ public class TaskServiceImpl implements TaskService {
 
         return taskRepository.save(updatedTask);
     }
+
+
 
     @Override
     public List<String> getTaskCollaborators(String taskId) {

@@ -16,13 +16,13 @@ public class TaskController {
 
     private final TaskServiceImpl taskService;
 
-    @GetMapping("/teamTasks/{teamId}")
+    @GetMapping("/teamTasks")
     public ResponseEntity<List<Task>> getTasksFromTeam(@RequestBody TasksRequest request) {
         List<Task> tasks = taskService.getTasksFromTeam(request);
         return ResponseEntity.ok(tasks);
     }
 
-    @GetMapping("/team/{teamId}/status")
+    @GetMapping("/teamTasks/status")
     public ResponseEntity<List<Task>> getTasksFromTeamByStatus(@RequestBody TasksByStatusRequest request) {
         List<Task> tasks = taskService.getTasksFromTeamByStatus(request);
         return ResponseEntity.ok(tasks);
