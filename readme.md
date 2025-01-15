@@ -60,3 +60,17 @@ docker-compose up --build
 ```bash
 docker-compose down
 ```
+
+### Tests running
+1. All tests:
+```bash
+mvn test
+```
+2. Only integration tests:
+```bash
+ ./mvnw test -Dtest=**/integration/**
+```
+3. Only unit tests:
+```bash
+./mvnw test -Dtest=**/unit/** 
+```
