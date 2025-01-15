@@ -1,8 +1,9 @@
-package org.example.tasker_back.repository;
+package org.example.tasker_back.unit.repository;
 
 import org.example.tasker_back.enums.Priority;
 import org.example.tasker_back.enums.TaskStatus;
 import org.example.tasker_back.model.Task;
+import org.example.tasker_back.repository.TaskRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;

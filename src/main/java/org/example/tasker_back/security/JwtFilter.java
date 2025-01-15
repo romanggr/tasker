@@ -22,13 +22,13 @@ public class JwtFilter extends OncePerRequestFilter {
     private static final String AUTHORIZATION_HEADER = "Authorization";
 
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
+    public boolean shouldNotFilter(HttpServletRequest request) {
         String excludeUrl = "/api/v1/auth";
         return request.getRequestURI().startsWith(excludeUrl);
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
         String token = request.getHeader(AUTHORIZATION_HEADER);

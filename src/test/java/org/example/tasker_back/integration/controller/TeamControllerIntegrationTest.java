@@ -1,9 +1,9 @@
-package org.example.tasker_back.controller;
+package org.example.tasker_back.integration.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
-import org.example.tasker_back.IntegrationTest;
+import org.example.tasker_back.integration.IntegrationTest;
 import org.example.tasker_back.config.TestConfig;
 import org.example.tasker_back.dto.team.CreateTeamRequest;
 import org.example.tasker_back.dto.team.DeleteTeamRequest;

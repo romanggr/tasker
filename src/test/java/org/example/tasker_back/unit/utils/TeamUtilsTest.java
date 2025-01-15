@@ -1,6 +1,7 @@
-package org.example.tasker_back.utils;
+package org.example.tasker_back.unit.utils;
 
 import org.example.tasker_back.dto.team.CreateTeamRequest;
+import org.example.tasker_back.utils.TeamUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

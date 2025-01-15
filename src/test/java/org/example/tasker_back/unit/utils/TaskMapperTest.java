@@ -1,10 +1,11 @@
-package org.example.tasker_back.utils;
+package org.example.tasker_back.unit.utils;
 
 import org.example.tasker_back.dto.task.CreateTaskRequest;
 import org.example.tasker_back.dto.task.UpdateTaskRequest;
 import org.example.tasker_back.enums.Priority;
 import org.example.tasker_back.enums.TaskStatus;
 import org.example.tasker_back.model.Task;
+import org.example.tasker_back.utils.TaskMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;

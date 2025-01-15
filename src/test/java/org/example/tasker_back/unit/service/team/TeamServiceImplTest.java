@@ -1,4 +1,4 @@
-package org.example.tasker_back.service.team;
+package org.example.tasker_back.unit.service.team;
 
 import org.example.tasker_back.dto.team.CreateTeamRequest;
 import org.example.tasker_back.dto.team.DeleteTeamRequest;
@@ -13,6 +13,7 @@ import org.example.tasker_back.model.User;
 import org.example.tasker_back.repository.TaskRepository;
 import org.example.tasker_back.repository.TeamRepository;
 import org.example.tasker_back.repository.UserRepository;
+import org.example.tasker_back.service.team.TeamServiceImpl;
 import org.example.tasker_back.utils.TeamUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -1,9 +1,11 @@
-package org.example.tasker_back.security;
+package org.example.tasker_back.unit.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.example.tasker_back.security.JwtFilter;
+import org.example.tasker_back.security.JwtService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;

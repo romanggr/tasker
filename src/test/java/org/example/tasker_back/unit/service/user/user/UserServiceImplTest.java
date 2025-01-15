@@ -1,4 +1,4 @@
-package org.example.tasker_back.service.user.user;
+package org.example.tasker_back.unit.service.user.user;
 
 import org.example.tasker_back.dto.user.AuthResponse;
 import org.example.tasker_back.dto.user.UpdatePasswordRequest;
@@ -9,6 +9,7 @@ import org.example.tasker_back.repository.TaskRepository;
 import org.example.tasker_back.repository.TeamRepository;
 import org.example.tasker_back.repository.UserRepository;
 import org.example.tasker_back.security.JwtService;
+import org.example.tasker_back.service.user.user.UserServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mindrot.jbcrypt.BCrypt;
@@ -59,7 +60,7 @@ class UserServiceImplTest {
         assertEquals(1, response.getUserDto().getRoles().size());
 
         verify(userRepository, times(1)).findById(request.getId());
-        verify(userRepository, times(2)).save(any());
+        verify(userRepository, times(1)).save(any());
         verify(jwtService, times(1)).generateToken(request.getEmail());
         verify(teamRepository, times(1)).findAllById(testUser.getTeamIds());
         verify(teamRepository, times(1)).saveAll(any());
@@ -109,7 +110,7 @@ class UserServiceImplTest {
         assertEquals(1, response.getUserDto().getRoles().size());
 
         verify(userRepository, times(1)).findById(request.getId());
-        verify(userRepository, times(2)).save(any());
+        verify(userRepository, times(1)).save(any());
         verify(jwtService, times(1)).generateToken(request.getEmail());
 
         verify(teamRepository, never()).findAllById(testUser.getTeamIds());
@@ -137,7 +138,7 @@ class UserServiceImplTest {
         assertEquals("Romik", response.getUserDto().getFullName());
 
         verify(userRepository, times(1)).findById(request.getId());
-        verify(userRepository, times(2)).save(any());
+        verify(userRepository, times(1)).save(any());
         verify(jwtService, times(1)).generateToken(request.getEmail());
 
         verify(teamRepository, never()).findAllById(testUser.getTeamIds());

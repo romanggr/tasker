@@ -1,10 +1,11 @@
-package org.example.tasker_back.utils;
+package org.example.tasker_back.unit.utils;
 
 import org.example.tasker_back.dto.user.RegistrationRequest;
 import org.example.tasker_back.dto.user.UpdateUserRequest;
 import org.example.tasker_back.dto.user.UserDTO;
 import org.example.tasker_back.enums.Role;
 import org.example.tasker_back.model.User;
+import org.example.tasker_back.utils.UserMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mindrot.jbcrypt.BCrypt;

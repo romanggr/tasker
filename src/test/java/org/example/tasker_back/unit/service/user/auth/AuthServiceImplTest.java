@@ -1,4 +1,4 @@
-package org.example.tasker_back.service.user.auth;
+package org.example.tasker_back.unit.service.user.auth;
 
 import org.example.tasker_back.dto.user.AuthResponse;
 import org.example.tasker_back.dto.user.LoginRequest;
@@ -7,6 +7,7 @@ import org.example.tasker_back.enums.Role;
 import org.example.tasker_back.model.User;
 import org.example.tasker_back.repository.UserRepository;
 import org.example.tasker_back.security.JwtService;
+import org.example.tasker_back.service.user.auth.AuthServiceImpl;
 import org.example.tasker_back.utils.UserMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

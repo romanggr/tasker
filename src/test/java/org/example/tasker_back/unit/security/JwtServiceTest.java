@@ -1,5 +1,6 @@
-package org.example.tasker_back.security;
+package org.example.tasker_back.unit.security;
 
+import org.example.tasker_back.security.JwtService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
